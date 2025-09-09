@@ -1,8 +1,6 @@
 import {clerkClient, clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/admin(.*)'])
-
 const publicRoutes = [
   '/sign-in(.*)',
   '/sign-up(.*)',
@@ -16,24 +14,36 @@ export default clerkMiddleware(async (auth, req) => {
 
   const {users} = await clerkClient()
 
-  //if user is not signed in
+  //if user is not logged in
   if(!userId && !publicRoutes.includes(req.nextUrl.pathname)) {
     return NextResponse.redirect(new URL('/sign-in', req.url))
   } 
 
   //user is logged in
   if(userId) {
-    const user = await users.getUser(userId)
-    const role = user.publicMetadata.role as string | undefined
-    
-    //redirect admin
-    if(role === 'admin' && req.nextUrl.pathname === '/dashboard') {
-      return NextResponse.redirect("/admin")
+    try {
+      const user = await users.getUser(userId)
+      const role = user.publicMetadata.role as string | undefined
+      
+      //redirect admin
+      if(role === 'admin' && req.nextUrl.pathname === '/dashboard') {
+        return NextResponse.redirect(new URL("/admin/dashboard", req.url))
+      }
+  
+      //prevent non admin user to access admin resource
+      if(role !== 'admin' && req.nextUrl.pathname.startsWith('/admin')) {
+        return NextResponse.redirect(new URL("/dashboard", req.url))
+      }
+  
+      //redirect authed users trying to access public sign-in sign-up routes
+      if(publicRoutes.includes(req.nextUrl.pathname)) {
+        return NextResponse.redirect(new URL(role === 'admin' ? '/admin/dashboard' : '/dashboard', req.url))
+      }
+    } catch (error) {
+      console.error(error)
+      return NextResponse.redirect(new URL('/error', req.url))
     }
-    
   }
-
-  if (isProtectedRoute(req)) await auth.protect()
 })
 
 export const config = {
