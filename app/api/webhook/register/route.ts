@@ -9,4 +9,11 @@ async function POST(req: Request) {
     if(!WEBHOOK_SECRET) {
         throw new Error("Please add webhook secret in env")
     }
+
+    const headerPayload = headers();
+    headerPayload.get("svix-id")
 }
+
+// "svix-id": "msg_p5jXN8AQM9LWM0D4loKWxJek",
+//   "svix-timestamp": "1614265330",
+//   "svix-signature": "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=",
