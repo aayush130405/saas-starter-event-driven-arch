@@ -10,10 +10,12 @@ async function POST(req: Request) {
         throw new Error("Please add webhook secret in env")
     }
 
-    const headerPayload = headers();
-    headerPayload.get("svix-id")
-}
+    const headerPayload = await headers();
+    const svix_id = headerPayload.get("svix-id")
+    const svix_timestamp = headerPayload.get("svix-timestamp")
+    const svix_signature = headerPayload.get("svix-signature")
 
-// "svix-id": "msg_p5jXN8AQM9LWM0D4loKWxJek",
-//   "svix-timestamp": "1614265330",
-//   "svix-signature": "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=",
+    if(!svix_id || !svix_timestamp || !svix_signature) {
+        return new Response("Error occured - No svix headers")
+    }
+}
