@@ -1,7 +1,7 @@
 "use client"
 
 import { useUser } from '@clerk/nextjs'
-import React, {useCallback, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import { Todo } from '@/app/generated/prisma'
 import { useDebounceValue } from 'usehooks-ts'
 
@@ -11,7 +11,9 @@ function Dashboard() {
     const [searchTerm, setSearchTerm] = useState('')
     const [loading, setLoading] = useState(false)
     const [totalPages, setTotalPages] = useState('')
-    const [currentPage, setCurrentPage] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
+    const [isSubscirbed, setIsSubscirbed] = useState(false)
+    const [subscriptionEnds, setSubscriptionEnds] = useState('')
 
     const [debouncedSearchTerm] = useDebounceValue(searchTerm, 300)     //to reduce unnecessary api calls
 
@@ -34,6 +36,42 @@ function Dashboard() {
             setLoading(false)
         }
     }, [debouncedSearchTerm])
+
+    useEffect(() => {
+        fetchTodos(1)
+        fetchSubscriptionStatus()
+    }, [])
+
+    const fetchSubscriptionStatus = async () => {
+        const response = await fetch("/api/subscription")
+        if(!response.ok) {
+            throw new Error("Failed to fetch subscription status")
+        }
+
+        const data = await response.json()
+
+        setIsSubscirbed(data.isSubscirbed)
+        setSubscriptionEnds(data.subscriptionEnds)
+
+    }
+
+    const handleAddTodo = async (title: string) => {
+        try {
+            const response = await fetch("/api/todos", {
+                method: "POST",
+                headers: {"Content-Type" : "application/json"},
+                body: JSON.stringify({title})
+            })
+
+            if(!response.ok) {
+                throw new Error("Failed to add todo")
+            }
+
+            await fetchTodos(currentPage) 
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
   return (
     <div>Dashboard</div>
