@@ -75,9 +75,19 @@ function Dashboard() {
 
     const handleUpdateTodo = async (id: string, completed: boolean) => {
         try {
-            await fetch(`/api/todos/${id}`)
-        } catch (error) {
+            const response = await fetch(`/api/todos/${id}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({completed})
+            })
             
+            if(!response.ok) {
+                throw new Error("Failed to update todo")
+            }
+
+            await fetchTodos(currentPage)
+        } catch (error) {
+            console.log(error)
         }
     }
 
