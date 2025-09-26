@@ -73,6 +73,14 @@ function Dashboard() {
         }
     }
 
+    const handleUpdateTodo = async (id: string, completed: boolean) => {
+        try {
+            await fetch(`/api/todos/${id}`)
+        } catch (error) {
+            
+        }
+    }
+
   return (
     <div>Dashboard</div>
   )
