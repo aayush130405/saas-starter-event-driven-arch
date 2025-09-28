@@ -42,7 +42,7 @@ function Signup() {
         }
 
         try {
-            await signUp.create({
+            signUp.create({
                 emailAddress,
                 password
             })
