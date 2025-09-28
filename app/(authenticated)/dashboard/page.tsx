@@ -91,6 +91,18 @@ function Dashboard() {
         }
     }
 
+    const handleDeleteTodo = async (id: string) =>  {
+        const response = await fetch(`/api/todos/${id}`,{
+            method: "DELETE"
+        })
+
+        if(!response.ok) {
+            throw new Error("Failed to delete Todo")
+        }
+
+        await fetchTodos(currentPage)
+    }
+
   return (
     <div>Dashboard</div>
   )
